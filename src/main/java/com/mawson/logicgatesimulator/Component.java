@@ -2,6 +2,7 @@ package com.mawson.logicgatesimulator;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 public abstract class Component {
     private int posX;
@@ -28,9 +29,10 @@ public abstract class Component {
         setPositionY(y);
     }
     
-    public abstract void draw(Graphics g);
     
-    public abstract void draw(Graphics g, Color c);
+    public abstract void draw(Graphics2D g2d); 
     
-    public abstract boolean isHit(int x, int y);
+    public abstract void draw(Graphics2D g2d, Color c);
+    
+    public abstract boolean isHitBody(int x, int y);
 }

@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import java.awt.BorderLayout;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class DrawPanel extends JPanel {
 
     private ArrayList<Component> componentList = new ArrayList<Component>();
     private Component selectedComponent = null;
-    
+
     JLabel statusLabel;
 
     public DrawPanel(JLabel statusLabel) {
@@ -35,26 +36,26 @@ public class DrawPanel extends JPanel {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
 
-        drawGrid(g);
+        drawGrid(g2d);
 
         for (Component component : componentList) {
-            component.draw(g);
+            component.draw(g2d);
         }
-        
-        if(selectedComponent != null) {
-            selectedComponent.draw(g, Color.RED);
+
+        if (selectedComponent != null) {
+            selectedComponent.draw(g2d, Color.RED);
         }
     }
 
     public void addGate(Gate gate) {
         componentList.add(gate);
-        System.out.println("AddGate\n");
         this.repaint();
     }
 
     private void drawGrid(Graphics g) {
-        g.setColor(Color.LIGHT_GRAY);
+        g.setColor(Color.decode("0xEEEEEE")); // set grid to a very light grey
 
         int canvasWidth = this.getWidth();
         int canvasHeight = this.getHeight();
@@ -75,7 +76,7 @@ public class DrawPanel extends JPanel {
     public Component getSelectedComponent() {
         return selectedComponent;
     }
-    
+
     public void setSelectedComponent(Component selectedComponent) {
         this.selectedComponent = selectedComponent;
     }
@@ -83,17 +84,20 @@ public class DrawPanel extends JPanel {
     private class MouseHandler extends MouseAdapter {
 
         public void mousePressed(MouseEvent event) {
-            if(selectedComponent != null){
+            if (selectedComponent != null) {
                 componentList.add(selectedComponent);
                 selectedComponent = null;
                 repaint();
             } else {
-                for(int i = componentList.size() - 1; i >= 0; i--){
-                    if(componentList.get(i).isHit(event.getX(), event.getY()) == true){
-                        selectedComponent = componentList.get(i);
+                for (int i = componentList.size() - 1; i >= 0; i--) {
+                    Component tmpComp = componentList.get(i);
+                    if (tmpComp.isHitBody(event.getX(), event.getY()) == true) {
+                        selectedComponent = tmpComp;
                         componentList.remove(i);
                         repaint();
                         return;
+                    } else if (tmpComp instanceof Gate
+                            && ((Gate) componentList.get(i)).isHitConnection(event.getX(), event.getY())) {
                     }
                 }
             }
@@ -104,18 +108,13 @@ public class DrawPanel extends JPanel {
 
         public void mouseMoved(MouseEvent event) {
             statusLabel.setText(String.format("Mouse Coordinates X: %d Y: %d", event.getX(), event.getY()));
-            if(selectedComponent != null) {
+            if (selectedComponent != null) {
                 selectedComponent.setPosition(event.getX() - 30, event.getY());
                 repaint();
             }
         }
 
         public void mouseDragged(MouseEvent event) {
-            //sets currentShapeObject x2 & Y2
-            //currentShapeObject.setX2(event.getX());
-            //currentShapeObject.setY2(event.getY());
-
-            //sets statusLabel to current mouse position
             statusLabel.setText(String.format("Mouse Coordinates X: %d Y: %d", event.getX(), event.getY()));
 
             repaint();
