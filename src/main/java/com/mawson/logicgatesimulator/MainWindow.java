@@ -38,7 +38,7 @@ public class MainWindow extends JFrame {
         JLabel statusLabel = new JLabel("Status");
         canvas = new DrawPanel(statusLabel);
         add(canvas, BorderLayout.CENTER);
-
+        
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 700);
         setVisible(true);
