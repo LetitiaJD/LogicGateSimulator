@@ -12,11 +12,13 @@ import java.util.ArrayList;
 
 public class DrawPanel extends JPanel {
 
-    private int offsetX = 103;
+    private int offsetX = 0;
     private int offsetY = 0;
-    private final int gridInterval = 20;
+    public final static int GRID_INTERVAL = 20;
 
     private ArrayList<Component> componentList = new ArrayList<Component>();
+    private Component selectedComponent = null;
+    
     JLabel statusLabel;
 
     public DrawPanel(JLabel statusLabel) {
@@ -39,6 +41,10 @@ public class DrawPanel extends JPanel {
         for (Component component : componentList) {
             component.draw(g);
         }
+        
+        if(selectedComponent != null) {
+            selectedComponent.draw(g, Color.RED);
+        }
     }
 
     public void addGate(Gate gate) {
@@ -53,22 +59,44 @@ public class DrawPanel extends JPanel {
         int canvasWidth = this.getWidth();
         int canvasHeight = this.getHeight();
 
-        int offsetX = this.offsetX % this.gridInterval;
+        int offsetX = this.offsetX % GRID_INTERVAL;
 
         // vertical lines
-        for (int x = offsetX; x < canvasWidth + offsetX; x = x + this.gridInterval) {
+        for (int x = offsetX; x < canvasWidth + offsetX; x = x + GRID_INTERVAL) {
             g.drawLine(x, 0, x, canvasHeight);
         }
 
         // horizontal lines
-        for (int y = offsetY; y < canvasHeight + offsetY; y = y + this.gridInterval) {
+        for (int y = offsetY; y < canvasHeight + offsetY; y = y + GRID_INTERVAL) {
             g.drawLine(0, y, canvasWidth, y);
         }
+    }
+
+    public Component getSelectedComponent() {
+        return selectedComponent;
+    }
+    
+    public void setSelectedComponent(Component selectedComponent) {
+        this.selectedComponent = selectedComponent;
     }
 
     private class MouseHandler extends MouseAdapter {
 
         public void mousePressed(MouseEvent event) {
+            if(selectedComponent != null){
+                componentList.add(selectedComponent);
+                selectedComponent = null;
+                repaint();
+            } else {
+                for(int i = componentList.size() - 1; i >= 0; i--){
+                    if(componentList.get(i).isHit(event.getX(), event.getY()) == true){
+                        selectedComponent = componentList.get(i);
+                        componentList.remove(i);
+                        repaint();
+                        return;
+                    }
+                }
+            }
         }
 
         public void mouseReleased(MouseEvent event) {
@@ -76,6 +104,10 @@ public class DrawPanel extends JPanel {
 
         public void mouseMoved(MouseEvent event) {
             statusLabel.setText(String.format("Mouse Coordinates X: %d Y: %d", event.getX(), event.getY()));
+            if(selectedComponent != null) {
+                selectedComponent.setPosition(event.getX() - 30, event.getY());
+                repaint();
+            }
         }
 
         public void mouseDragged(MouseEvent event) {

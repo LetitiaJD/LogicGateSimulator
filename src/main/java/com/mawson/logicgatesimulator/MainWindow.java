@@ -104,9 +104,9 @@ public class MainWindow extends JFrame {
         public void actionPerformed(ActionEvent e) {
             System.out.println("Selected: " + e.getActionCommand());
             if(e.getActionCommand().equals("AND")) {
-                canvas.addGate(new AND());
+                canvas.setSelectedComponent(new AND());
             } else if(e.getActionCommand().equals("NOT")) {
-                canvas.addGate(new NOT());
+                canvas.setSelectedComponent(new NOT());
             }
         }
     }

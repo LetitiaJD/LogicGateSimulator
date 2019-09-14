@@ -1,5 +1,6 @@
 package com.mawson.logicgatesimulator;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 public abstract class Component {
@@ -11,7 +12,7 @@ public abstract class Component {
     }
 
     public void setPositionX(int posX) {
-        this.posX = posX;
+        this.posX = 1 + Math.round(posX / DrawPanel.GRID_INTERVAL) * DrawPanel.GRID_INTERVAL;
     }
 
     public int getPositionY() {
@@ -19,13 +20,17 @@ public abstract class Component {
     }
 
     public void setPositionY(int posY) {
-        this.posY = posY;
+        this.posY = 1 + Math.round(posY / DrawPanel.GRID_INTERVAL) * DrawPanel.GRID_INTERVAL;
     }
     
     public void setPosition(int x, int y) {
-        this.posX = x;
-        this.posY = y;
+        setPositionX(x);
+        setPositionY(y);
     }
     
     public abstract void draw(Graphics g);
+    
+    public abstract void draw(Graphics g, Color c);
+    
+    public abstract boolean isHit(int x, int y);
 }
