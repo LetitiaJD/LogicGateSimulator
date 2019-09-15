@@ -19,8 +19,8 @@ public class AND extends Gate {
 
     public AND() {
         // AND must always have at least 2 inputs
-        inputList.add(null);
-        inputList.add(null);
+        inputList.add(new Signal());
+        inputList.add(new Signal());
     }
 
     @Override

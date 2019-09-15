@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 import java.util.ArrayList;
@@ -49,11 +50,6 @@ public class DrawPanel extends JPanel {
         }
     }
 
-    public void addGate(Gate gate) {
-        componentList.add(gate);
-        this.repaint();
-    }
-
     private void drawGrid(Graphics g) {
         g.setColor(Color.decode("0xEEEEEE")); // set grid to a very light grey
 
@@ -78,29 +74,79 @@ public class DrawPanel extends JPanel {
     }
 
     public void setSelectedComponent(Component selectedComponent) {
+        if (this.selectedComponent != null && this.selectedComponent instanceof Wire) { // there is still a component selected
+            // save it first
+            componentList.add(this.selectedComponent);
+            ((Wire) this.selectedComponent).saveCursorPoint();
+        }
         this.selectedComponent = selectedComponent;
     }
 
     private class MouseHandler extends MouseAdapter {
 
-        public void mousePressed(MouseEvent event) {
-            if (selectedComponent != null) {
-                componentList.add(selectedComponent);
-                selectedComponent = null;
-                repaint();
-            } else {
+        public void reactToSelectedPress(MouseEvent event) {
+            if (selectedComponent instanceof Wire) {
+
                 for (int i = componentList.size() - 1; i >= 0; i--) {
                     Component tmpComp = componentList.get(i);
-                    if (tmpComp.isHitBody(event.getX(), event.getY()) == true) {
-                        selectedComponent = tmpComp;
-                        componentList.remove(i);
-                        repaint();
-                        return;
-                    } else if (tmpComp instanceof Gate
-                            && ((Gate) componentList.get(i)).isHitConnection(event.getX(), event.getY())) {
+                    if (tmpComp instanceof Gate) {
+                        Signal signal = ((Gate)tmpComp).isHitInput(event.getX(), event.getY());
+                        
+                        if(signal != null) {
+                            // if a existing connection is hit
+                            System.out.println("Existing connection has been hit");
+
+                            Point p = ((Gate)tmpComp).getInputPoint(((Gate)tmpComp).findSignal(signal));
+                            
+                            int posX = 1 + Math.round(((float) p.x) / DrawPanel.GRID_INTERVAL) * DrawPanel.GRID_INTERVAL;
+                            int posY = 1 + Math.round(((float) p.y) / DrawPanel.GRID_INTERVAL) * DrawPanel.GRID_INTERVAL;
+
+                            ((Wire) selectedComponent).addPoint(new Point(posX, posY));
+                
+                            componentList.add(selectedComponent);
+                            selectedComponent = null;
+                            return;
+                        }
                     }
                 }
+
+                int posX = 1 + Math.round(((float) event.getX()) / DrawPanel.GRID_INTERVAL) * DrawPanel.GRID_INTERVAL;
+                int posY = 1 + Math.round(((float) event.getY()) / DrawPanel.GRID_INTERVAL) * DrawPanel.GRID_INTERVAL;
+
+                ((Wire) selectedComponent).addPoint(new Point(posX, posY));
+
+            } else {
+                componentList.add(selectedComponent);
+                selectedComponent = null;
             }
+
+        }
+
+        public void reactToNormalPress(MouseEvent event) {
+            for (int i = componentList.size() - 1; i >= 0; i--) {
+                Component tmpComp = componentList.get(i);
+                if (tmpComp.isHitBody(event.getX(), event.getY()) == true) {
+                    selectedComponent = tmpComp;
+                    componentList.remove(i);
+                    return;
+                } else if (tmpComp instanceof Gate
+                        && ((Gate) componentList.get(i)).isHitInput(event.getX(), event.getY()) != null) {
+                    // if a existing connection is hit
+                    System.out.println("Existing connection");
+                }
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent event) {
+
+            if (selectedComponent != null) {
+                reactToSelectedPress(event);
+            } else {
+                reactToNormalPress(event);
+            }
+
+            repaint();
         }
 
         public void mouseReleased(MouseEvent event) {
@@ -109,7 +155,11 @@ public class DrawPanel extends JPanel {
         public void mouseMoved(MouseEvent event) {
             statusLabel.setText(String.format("Mouse Coordinates X: %d Y: %d", event.getX(), event.getY()));
             if (selectedComponent != null) {
-                selectedComponent.setPosition(event.getX() - 30, event.getY());
+                if (selectedComponent instanceof Wire) {
+                    ((Wire) selectedComponent).setCursorPoint(event.getPoint());
+                } else {
+                    selectedComponent.setPosition(event.getX() - 30, event.getY());
+                }
                 repaint();
             }
         }

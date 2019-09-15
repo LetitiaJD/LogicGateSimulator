@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.util.ArrayList;
@@ -40,15 +41,10 @@ public abstract class Gate extends Component {
     protected int getNumberOfInputs() {
 
         if (inputList.size() < getMinimumNumberOfInputs()) {
-            System.out.println("SDADSAD " + getMinimumNumberOfInputs());
+            
             return getMinimumNumberOfInputs();
         }
         return inputList.size();
-    }
-
-    @Override
-    public void draw(Graphics2D g2d) {
-        this.draw(g2d, Color.BLACK);
     }
 
     @Override
@@ -70,34 +66,55 @@ public abstract class Gate extends Component {
 
         g2d.setFont(new Font("TimesRoman", Font.PLAIN, 40));
     }
+    
+    public Point getInputPoint(int input) {
+        int x = getPositionX() - HALF_HEIGHT_PER_INPUT;
+        int y = getPositionY() + input * 2 * HALF_HEIGHT_PER_INPUT + HALF_HEIGHT_PER_INPUT;
+        
+        return new Point(x,y);
+    }
+    
+    public int findSignal(Signal signal) {
+        int numberOfInputs = inputList.size();
 
+        for (int i = 0; i < numberOfInputs; i++) {
+            if(inputList.get(i).equals(signal)) {
+                return i;
+            }
+        }
+        
+        return 0;
+    }
+    
     public void drawInputs(Graphics2D g2d) {
         Color saveColor = g2d.getColor();
         Stroke saveStroke = g2d.getStroke();
 
-        //System.out.println("DRAW INPUTS " + getNumberOfInputs());
+        System.out.println("DRAW INPUTS " + getNumberOfInputs());
         for (int i = 0; i < getNumberOfInputs(); i++) {
-            g2d.drawLine(getPositionX() - HALF_HEIGHT_PER_INPUT,
-                    getPositionY() + i * 2 * HALF_HEIGHT_PER_INPUT + HALF_HEIGHT_PER_INPUT,
+            Point inputPoint = getInputPoint(i);
+            
+            g2d.drawLine(inputPoint.x,
+                    inputPoint.y,
                     getPositionX(),
-                    getPositionY() + i * 2 * HALF_HEIGHT_PER_INPUT + HALF_HEIGHT_PER_INPUT);
+                    inputPoint.y);
 
-            if (inputList.size() <= i || inputList.get(i) == null) {
+            if (inputList.size() <= i || inputList.get(i).isIsConnected() == false) {
                 g2d.setColor(Color.red);
-                g2d.drawLine(getPositionX() - HALF_HEIGHT_PER_INPUT - CONNECTION_CROSS,
-                        getPositionY() + i * 2 * HALF_HEIGHT_PER_INPUT + HALF_HEIGHT_PER_INPUT - CONNECTION_CROSS,
-                        getPositionX() - HALF_HEIGHT_PER_INPUT + CONNECTION_CROSS,
-                        getPositionY() + i * 2 * HALF_HEIGHT_PER_INPUT + HALF_HEIGHT_PER_INPUT + CONNECTION_CROSS);
+                g2d.drawLine(inputPoint.x - CONNECTION_CROSS,
+                        inputPoint.y - CONNECTION_CROSS,
+                        inputPoint.x + CONNECTION_CROSS,
+                        inputPoint.y + CONNECTION_CROSS);
 
-                g2d.drawLine(getPositionX() - HALF_HEIGHT_PER_INPUT - CONNECTION_CROSS,
-                        getPositionY() + i * 2 * HALF_HEIGHT_PER_INPUT + HALF_HEIGHT_PER_INPUT + CONNECTION_CROSS,
-                        getPositionX() - HALF_HEIGHT_PER_INPUT + CONNECTION_CROSS,
-                        getPositionY() + i * 2 * HALF_HEIGHT_PER_INPUT + HALF_HEIGHT_PER_INPUT - CONNECTION_CROSS);
+                g2d.drawLine(inputPoint.x - CONNECTION_CROSS,
+                        inputPoint.y + CONNECTION_CROSS,
+                        inputPoint.x + CONNECTION_CROSS,
+                        inputPoint.y - CONNECTION_CROSS);
 
                 g2d.setColor(Color.LIGHT_GRAY);
                 g2d.setStroke(new BasicStroke(1));
-                g2d.drawOval(getPositionX() - HALF_HEIGHT_PER_INPUT - CONNECTION_RADIUS,
-                        getPositionY() + i * 2 * HALF_HEIGHT_PER_INPUT + HALF_HEIGHT_PER_INPUT - CONNECTION_RADIUS,
+                g2d.drawOval(inputPoint.x - CONNECTION_RADIUS,
+                        inputPoint.y - CONNECTION_RADIUS,
                         2 * CONNECTION_RADIUS,
                         2 * CONNECTION_RADIUS);
 
@@ -124,7 +141,7 @@ public abstract class Gate extends Component {
         return true;
     }
 
-    public boolean isHitConnection(int x, int y) {
+    public Signal isHitInput(int x, int y) {
         int numberOfInputs = inputList.size();
         int ovalRadius = (HALF_HEIGHT_PER_INPUT * 3) / 4;
 
@@ -136,11 +153,11 @@ public abstract class Gate extends Component {
 
             if (distance <= ovalRadius) {
                 System.out.println("Connection is Hit");
-                return true;
+                return inputList.get(i);
             }
         }
 
-        return false;
+        return null;
     }
 
     public abstract int calculateResult();

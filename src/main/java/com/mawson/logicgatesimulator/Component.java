@@ -30,7 +30,9 @@ public abstract class Component {
     }
     
     
-    public abstract void draw(Graphics2D g2d); 
+    public void draw(Graphics2D g2d) {
+        this.draw(g2d, Color.BLACK);
+    }
     
     public abstract void draw(Graphics2D g2d, Color c);
     

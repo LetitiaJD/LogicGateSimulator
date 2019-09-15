@@ -16,7 +16,7 @@ public class NOT extends Gate {
     public final int MINIMUM_NUMBER_INPUTS = 1;
 
     public NOT() {
-        inputList.add(null);
+        inputList.add(new Signal());
     }
 
     @Override

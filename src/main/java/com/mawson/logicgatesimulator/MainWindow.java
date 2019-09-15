@@ -81,16 +81,19 @@ public class MainWindow extends JFrame {
         menuEdit.add(menuItemEditCopy);
         menuEdit.add(menuItemEditPaste);
 
+        JMenuItem menuItemWire = new JMenuItem("Wire");
         JMenuItem menuItemGatesAND = new JMenuItem("AND");
         JMenuItem menuItemGatesOR = new JMenuItem("OR");
         JMenuItem menuItemGatesNOT = new JMenuItem("NOT");
         JMenuItem menuItemGatesXOR = new JMenuItem("XOR");
 
+        menuGates.add(menuItemWire);
         menuGates.add(menuItemGatesAND);
         menuGates.add(menuItemGatesOR);
         menuGates.add(menuItemGatesNOT);
         menuGates.add(menuItemGatesXOR);
 
+        menuItemWire.addActionListener(new GateActionListener());
         menuItemGatesAND.addActionListener(new GateActionListener());
         menuItemGatesOR.addActionListener(new GateActionListener());
         menuItemGatesNOT.addActionListener(new GateActionListener());
@@ -107,6 +110,8 @@ public class MainWindow extends JFrame {
                 canvas.setSelectedComponent(new AND());
             } else if(e.getActionCommand().equals("NOT")) {
                 canvas.setSelectedComponent(new NOT());
+            } else if(e.getActionCommand().equals("Wire")) {
+                canvas.setSelectedComponent(new Wire());
             }
         }
     }
