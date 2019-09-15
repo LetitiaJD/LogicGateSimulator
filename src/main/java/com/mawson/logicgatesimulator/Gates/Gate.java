@@ -89,8 +89,7 @@ public abstract class Gate extends Component {
     public void drawInputs(Graphics2D g2d) {
         Color saveColor = g2d.getColor();
         Stroke saveStroke = g2d.getStroke();
-
-        System.out.println("DRAW INPUTS " + getNumberOfInputs());
+        
         for (int i = 0; i < getNumberOfInputs(); i++) {
             Point inputPoint = getInputPoint(i);
             
