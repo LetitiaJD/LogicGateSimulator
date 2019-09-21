@@ -22,15 +22,17 @@ public class Wire extends Component {
 
     private ArrayList<Point> pointList = new ArrayList<Point>();
     private Point cursorPoint = null;
-    private int strokeWidth = 3;
-    private final int BOXWIDTH = 4;
-    private final int HALF_GRID_INTERVAL = DrawPanel.GRID_INTERVAL / 2 - 1;
 
     private final String WIREMODES[] = {
         "TopCorner", "BottomCorner", "DiagnonalFirst", "DiagnonalLast", "Straight"
     };
 
     private String currentWireMode = WIREMODES[2];
+
+    @Override
+    public void draw(Graphics2D g2d) {
+        this.draw(g2d, UISettings.WIRE_STROKE_COLOR);
+    }
 
     @Override
     public void draw(Graphics2D g2d, Color c) {
@@ -42,14 +44,17 @@ public class Wire extends Component {
 
         g2d.setColor(c);
 
-        Stroke stroke1 = new BasicStroke(strokeWidth);
+        Stroke stroke1 = new BasicStroke(UISettings.WIRE_STROKE_WIDTH);
         g2d.setStroke(stroke1);
 
         Point previousPoint = pointList.get(0);
         for (int i = 1; i < pointList.size(); i++) {
             Point currentPoint = pointList.get(i);
             g2d.drawLine(previousPoint.x, previousPoint.y, currentPoint.x, currentPoint.y);
-            g2d.drawRect(previousPoint.x - BOXWIDTH / 2, previousPoint.y - BOXWIDTH / 2, BOXWIDTH, BOXWIDTH);
+            g2d.drawRect(previousPoint.x - UISettings.WIRE_POINT_SIZE / 2, 
+                    previousPoint.y - UISettings.WIRE_POINT_SIZE / 2, 
+                    UISettings.WIRE_POINT_SIZE, 
+                    UISettings.WIRE_POINT_SIZE);
             previousPoint = currentPoint;
         }
 
@@ -69,44 +74,44 @@ public class Wire extends Component {
 
         float dot = A * E + B * F;
         float len_sq = E * E + F * F;
-        
+
         double distance = Math.abs(dot) / Math.sqrt(len_sq);
 
-        return (int)distance;
+        return (int) distance;
     }
 
     @Override
-    public boolean isHitBody(int x, int y) {
+    public Component isHit(Point mousePoint) {
 
         if (pointList.size() < 1) {
-            return false;
+            return null;
         }
 
         Point previousPoint = pointList.get(0);
         for (int i = 1; i < pointList.size(); i++) {
             Point currentPoint = pointList.get(i);
 
-            int minX = Math.min(previousPoint.x, currentPoint.x) - HALF_GRID_INTERVAL;
-            int maxX = Math.max(previousPoint.x, currentPoint.x) + HALF_GRID_INTERVAL;
-            int minY = Math.min(previousPoint.y, currentPoint.y) - HALF_GRID_INTERVAL;
-            int maxY = Math.max(previousPoint.y, currentPoint.y) + HALF_GRID_INTERVAL;
+            int minX = Math.min(previousPoint.x, currentPoint.x) - UISettings.HALF_GRID_INTERVAL;
+            int maxX = Math.max(previousPoint.x, currentPoint.x) + UISettings.HALF_GRID_INTERVAL;
+            int minY = Math.min(previousPoint.y, currentPoint.y) - UISettings.HALF_GRID_INTERVAL;
+            int maxY = Math.max(previousPoint.y, currentPoint.y) + UISettings.HALF_GRID_INTERVAL;
 
-            if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+            if (mousePoint.x >= minX && mousePoint.x <= maxX && mousePoint.y >= minY && mousePoint.y <= maxY) {
                 // if line is diagonal
                 if (previousPoint.x != currentPoint.x && previousPoint.y != currentPoint.y) {
-                    if(this.getDistance(x, y, previousPoint, currentPoint) < HALF_GRID_INTERVAL) {
+                    if (this.getDistance(mousePoint.x, mousePoint.y, previousPoint, currentPoint) < UISettings.HALF_GRID_INTERVAL) {
                         System.out.println("Nah GENUG!");
-                        return true;
+                        return this;
                     }
                 } else {
                     System.out.println("Wire has been hit!!");
-                    return true;
+                    return this;
                 }
             }
             previousPoint = currentPoint;
         }
 
-        return false; //true;
+        return null; //true;
     }
 
     public void saveCursorPoint() {

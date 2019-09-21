@@ -102,7 +102,7 @@ public class MainWindow extends JFrame {
         setJMenuBar(menuBar);
     }
 
-    class GateActionListener implements ActionListener {
+    private class GateActionListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
             System.out.println("Selected: " + e.getActionCommand());
@@ -115,4 +115,6 @@ public class MainWindow extends JFrame {
             }
         }
     }
+    
+    
 }
